@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta nama="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Document</title>
+</head>
+<body class="bg-red-700 justify-center">
+    <nav class="bg-white shadow-lg flex justify-between items-center">
+		<!-- Website Logo -->
+		<div>
+			<a href="#" class="flex items-center py-4 px-5">
+				<img src="./img/logo2.jfif" alt="" class="h-10 w-10" />
+				    <span class="font-bold text-yellow-500 text-lg px-5"
+				    >Baso Japri</span>
+            </a>
+		</div>
+
+	</nav>
+
+    
+  <div class=" flex-wrap container mx-auto py-4 px-20">
+  <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="namaBaso">
+        Nama Baso
+      </label>
+      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="nama" nama="nama" type="text" placeholder="Nama Baso">
+    </div>
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="HargaBaso">
+        Harga Baso
+      </label>
+      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="harga" nama="harga" type="number" placeholder="Harga Baso">
+    </div>
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="Qty">
+        Qty
+      </label>
+      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="qty" nama="qty" type="number" placeholder="Qty">
+    </div>
+    <div class="flex items-center justify-between">
+      <button class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onclick="saveData()">
+        Simpan
+      </button>
+      <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
+        Batal
+      </a>
+    </div>
+  </form>
+  </div>
+
+      
+  <div class=" flex-wrap container mx-auto py-4 px-20">
+    <table class=" flex-wrap container mx-auto py-4 rounded">
+      <thead class="text-center text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 py-4">
+        <tr>
+          <th scope="col" class="px-6 py-3">
+            No
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Nama Baso
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Harga Baso
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Qty
+          </th>
+          <th scope="col" class="px-6 py-3">
+            Action
+          </th>
+        </tr>
+        </thead>
+      <tbody id="result" class="px-6 py-3">
+      </tbody>
+  </table>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+    const getData = async () => {
+      await axios.get(`https://database.politekniklp3i-tasikmalaya.ac.id/api/bakso`)
+      .then((response) => {
+        let bucket = '';
+        let bakso = response.data.baksos;
+        for (let i = 0; i < bakso.length; i++) {
+          bucket += `
+            <tr class="px-10 py-3 text-center text-white">
+              <td>${i + 1}</td> 
+              <td>${bakso[i].nama}</td> 
+              <td>${bakso[i].harga}</td> 
+              <td>${bakso[i].qty}</td> 
+              <td class="py-4">
+                <button onclick="editData('${bakso[i].id}','${bakso[i].nama}','${bakso[i].harga}','${bakso[i].qty}')" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline border-solid border px-4 py-2 bg-yellow-600 font-bold text-white">Edit</button>
+                <button onclick="deleteData(${bakso[i].id})" class="border-solid border px-7 py-2 bg-yellow-600 font-bold text-white bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Delete</button>
+              </td>
+            </tr>
+          `
+        }
+        document.getElementById('result').innerHTML = bucket
+      });
+    }
+    getData();
+
+    const deleteData = async (id) => {
+      let text = 'Yakin akan menghapus data?';
+        if (confirm(text) == true) {
+          await axios.delete(`https://database.politekniklp3i-tasikmalaya.ac.id/api/bakso/${id}`)
+            .then((response) => {
+              getData();
+              console.log(response);
+            })
+            .catch((error) => {
+                console.log(error.message);
+            });
+      }  
+    }
+
+    const saveData = async () => {
+      let nama  = document.getElementById('nama').value;
+      let harga = document.getElementById('harga').value;
+      let qty   = document.getElementById('qty').value;
+        await axios.post(`https://database.politekniklp3i-tasikmalaya.ac.id/api/bakso`, {
+            nama: nama,
+            harga: harga,
+            qty: qty
+          })
+          .then((response) => {
+            getData();
+            document.getElementById('nama').value = "";
+            document.getElementById('harga').value = "";
+            document.getElementById('qty').value = "";
+            console.log('Berhasil Ditambahkan!')
+          })
+          .catch((error) => {
+            console.log(error.message);
+          });
+    }
+
+    const editData = async (id, nama, harga, qty) => {
+      document.getElementById('nama').value = nama;
+      document.getElementById('harga').value = harga;
+      document.getElementById('qty').value = qty;
+      document.getElementById('button').innerText = 'Edit';
+      document.getElementById('button').setAttribute('onclick', `updateData(${id})`);
+    }
+
+    const updateData = async (id) => {
+      let nama = document.getElementById('nama').value;
+      let harga = document.getElementById('harga').value;
+      let qty = document.getElementById('qty').value;
+      let text = 'Yakin anda mengubah data?'
+        if (confirm(text) == true) {
+          await axios.post(`https://database.politekniklp3i-tasikmalaya.ac.id/api/bakso/${id}`, {
+            nama: nama,
+            harga: harga,
+            qty: qty
+            })
+            .then((response) => {
+              getData();
+              document.getElementById('nama').value = "";
+              document.getElementById('harga').value = "";
+              document.getElementById('qty').value = "";
+              console.log('Berhasil Diubah!')
+            })
+            .catch((error) => {
+                console.log(error.message);
+            }); 
+      }
+    }
+  </script>
+</body>
+</html>
